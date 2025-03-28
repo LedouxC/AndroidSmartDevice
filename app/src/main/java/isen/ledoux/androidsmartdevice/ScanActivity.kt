@@ -16,7 +16,10 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import isen.ledoux.androidsmartdevice.ui.theme.AndroidSmartDeviceTheme
 
 class ScanActivity : ComponentActivity() {
@@ -134,21 +138,33 @@ class ScanActivity : ComponentActivity() {
         }
     }
 
+    private fun hasScanPermissions(): Boolean {
+        return (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+    }
+
+
     @SuppressLint("MissingPermission")
     private fun startScan() {
+        if (!hasScanPermissions()) {
+            Toast.makeText(this, "Permissions manquantes pour scanner", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         if (bluetoothAdapter.isEnabled) {
+            // Stop any scan en cours pour éviter les conflits (évite l'erreur code 2)
+            bluetoothAdapter.bluetoothLeScanner.stopScan(scanCallback)
+
             isScanning = true
             Toast.makeText(this, "Scan en cours...", Toast.LENGTH_SHORT).show()
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                bluetoothAdapter.bluetoothLeScanner.startScan(scanCallback)
-            } else {
-                Toast.makeText(this, "Le Bluetooth Low Energy (BLE) n'est pas supporté sur cette version Android.", Toast.LENGTH_SHORT).show()
-            }
+            bluetoothAdapter.bluetoothLeScanner.startScan(scanCallback)
         } else {
             Toast.makeText(this, "Activez le Bluetooth pour scanner.", Toast.LENGTH_SHORT).show()
         }
     }
+
 
     @SuppressLint("MissingPermission")
     private fun stopScan() {
@@ -173,33 +189,72 @@ fun ScanScreen(
     onStopScanClick: () -> Unit,
     onBluetoothStateChange: (Boolean) -> Unit
 ) {
-    // Context de l'activité
     val context = LocalContext.current
 
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 24.dp, vertical = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
         ) {
-            Text(text = "Scan BLE", style = MaterialTheme.typography.headlineMedium)
-            Spacer(modifier = Modifier.height(24.dp))
-            Button(onClick = onScanClick, modifier = Modifier.fillMaxWidth()) {
-                Text("Scanner")
-            }
+            Icon(
+                imageVector = Icons.Filled.Bluetooth,
+                contentDescription = "Icône Bluetooth",
+                modifier = Modifier.size(72.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
-            if (isScanning) {
-                Button(onClick = onStopScanClick, modifier = Modifier.fillMaxWidth()) {
-                    Text("Arrêter")
+
+            Text(
+                text = "Recherche de périphériques BLE",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            if (!isScanning) {
+                Button(
+                    onClick = onScanClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Text("Lancer le scan")
                 }
+            } else {
+                Button(
+                    onClick = onStopScanClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    ),
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Text("Arrêter le scan")
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
                 CircularProgressIndicator()
             }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
             devicesList(devices, context)
         }
     }
 }
+
 
 @Composable
 fun devicesList(devices: List<BluetoothDevice>, context: Context) {
@@ -217,15 +272,43 @@ fun devicesList(devices: List<BluetoothDevice>, context: Context) {
 @SuppressLint("MissingPermission")
 @Composable
 fun DeviceButton(device: BluetoothDevice, context: Context) {
-    Button(
-        onClick = {
-            val intent = Intent(context, DeviceDetailsActivity::class.java)
-            intent.putExtra("deviceName", device)
-            context.startActivity(intent)
-        },
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF03DAC5))
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+            .clickable {
+                val intent = Intent(context, DeviceDetailsActivity::class.java)
+                intent.putExtra("deviceName", device)
+                context.startActivity(intent)
+            },
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Text(text = device.name)
+        Row(
+            modifier = Modifier
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.logo), // ou une icône BLE stylisée si tu veux
+                contentDescription = "Appareil BLE",
+                modifier = Modifier.size(36.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column {
+                Text(
+                    text = device.name ?: "Nom inconnu",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = device.address,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+        }
     }
 }

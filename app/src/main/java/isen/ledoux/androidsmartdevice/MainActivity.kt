@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import isen.ledoux.androidsmartdevice.ui.theme.AndroidSmartDeviceTheme
 import androidx.compose.ui.unit.sp
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
