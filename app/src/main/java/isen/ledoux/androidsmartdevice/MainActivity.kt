@@ -13,8 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import isen.ledoux.androidsmartdevice.ui.theme.AndroidSmartDeviceTheme
 import androidx.compose.ui.unit.sp
+import isen.ledoux.androidsmartdevice.ui.theme.AndroidSmartDeviceTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,10 +22,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             AndroidSmartDeviceTheme {
-                // Définition du contenu
-                MainScreen(
-                    onBluetoothClick = {
-                        // Lancement de l'activité ScanActivity lorsque le bouton est cliqué
+                HomeScreen(
+                    onNavigateToScan = {
                         val intent = Intent(this, ScanActivity::class.java)
                         startActivity(intent)
                     }
@@ -36,21 +34,19 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(onBluetoothClick: () -> Unit) {
+fun HomeScreen(onNavigateToScan: () -> Unit) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background
-    ) { innerPadding ->
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(paddingValues)
                 .padding(horizontal = 24.dp, vertical = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-
-            // Partie haute avec logo et texte
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
                     painter = painterResource(id = R.drawable.logo),
@@ -78,7 +74,7 @@ fun MainScreen(onBluetoothClick: () -> Unit) {
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
-                    onClick = onBluetoothClick,
+                    onClick = onNavigateToScan,
                     shape = MaterialTheme.shapes.medium,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -88,7 +84,6 @@ fun MainScreen(onBluetoothClick: () -> Unit) {
                 }
             }
 
-            // Logos en bas
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -111,11 +106,10 @@ fun MainScreen(onBluetoothClick: () -> Unit) {
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
-fun MainScreenPreview() {
+fun HomeScreenPreview() {
     AndroidSmartDeviceTheme {
-        MainScreen(onBluetoothClick = {})
+        HomeScreen(onNavigateToScan = {})
     }
 }
