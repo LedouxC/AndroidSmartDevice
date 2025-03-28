@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
+    <!-- Permissions pour le Bluetooth et le scan BLE -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-    <!-- Permissions spécifiques Android 12+ -->
-    <uses-permission
-        android:name="android.permission.BLUETOOTH_SCAN"
-        android:usesPermissionFlags="neverForLocation"
-        tools:targetApi="31" />
-    <uses-permission
-        android:name="android.permission.BLUETOOTH_CONNECT"
-        tools:targetApi="31" />
-
-    <!-- Spécifie que l'app utilise du Bluetooth Low Energy -->
-    <uses-feature android:name="android.hardware.bluetooth_le" android:required="true" />
+    <!-- Déclare que l'appareil supporte le Bluetooth Low Energy -->
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -29,11 +24,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidSmartDevice"
         tools:targetApi="31">
+
+        <!-- Activité pour afficher les détails du périphérique Bluetooth -->
         <activity
-            android:name=".ScanActivity"
+            android:name=".DeviceDetailsActivity"
             android:exported="false"
-            android:label="@string/title_activity_scan"
+            android:label="@string/title_activity_device_details"
             android:theme="@style/Theme.AndroidSmartDevice" />
+
+        <!-- Activité principale de l'application -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -41,10 +40,16 @@
             android:theme="@style/Theme.AndroidSmartDevice">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Activité pour scanner les appareils BLE -->
+        <activity
+            android:name=".ScanActivity"
+            android:exported="false"
+            android:label="@string/title_activity_scan"
+            android:theme="@style/Theme.AndroidSmartDevice" />
     </application>
 
 </manifest>

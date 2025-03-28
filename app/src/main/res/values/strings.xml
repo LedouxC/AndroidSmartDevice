@@ -6,4 +6,5 @@
     <string name="start_scanning_ble_devices">Start Scanning BLE Devices</string>
     <string name="title_activity_scan_activity.kt">ScanActivity.kt</string>
     <string name="title_activity_scan">ScanActivity</string>
+    <string name="title_activity_device_details">Device Details</string>
 </resources>

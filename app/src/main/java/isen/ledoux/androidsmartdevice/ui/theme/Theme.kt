@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
-
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
@@ -20,17 +19,24 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF0D47A1),        // Bleu foncé
-    secondary = Color(0xFF1976D2),      // Bleu plus clair
-    tertiary = Color(0xFF90CAF9),       // Bleu doux / tertiaire
-    background = Color(0xFFFFFFFF),     // Gris clair
-    surface = Color.White,
+    primary = Color(0xFF4F46E5),      // Violet indigo
+    onPrimary = Color.White,
+    background = Color(0xFFF8FAFC),   // Très clair
+    onBackground = Color(0xFF1E293B), // Bleu très foncé
+    secondary = PurpleGrey40,
+    tertiary = Pink40
+)
+
+
+    /* Other default colors to override
+    background = Color(0xFFFFFBFE),
+    surface = Color(0xFFFFFBFE),
     onPrimary = Color.White,
     onSecondary = Color.White,
-    onTertiary = Color.Black,
-    onBackground = Color.Black,
-    onSurface = Color.Black
-)
+    onTertiary = Color.White,
+    onBackground = Color(0xFF1C1B1F),
+    onSurface = Color(0xFF1C1B1F),
+    */
 
 @Composable
 fun AndroidSmartDeviceTheme(
