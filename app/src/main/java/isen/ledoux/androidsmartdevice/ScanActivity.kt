@@ -31,6 +31,8 @@ import androidx.core.content.ContextCompat
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import isen.ledoux.androidsmartdevice.ui.theme.AndroidSmartDeviceTheme
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 
 class ScanActivity : ComponentActivity() {
     private lateinit var bluetoothAdapter: BluetoothAdapter
@@ -195,7 +197,7 @@ fun ScanScreen(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
@@ -203,54 +205,75 @@ fun ScanScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            Icon(
-                imageVector = Icons.Filled.Bluetooth,
-                contentDescription = "Icône Bluetooth",
-                modifier = Modifier.size(72.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Recherche de périphériques BLE",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            if (!isScanning) {
-                Button(
-                    onClick = onScanClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = MaterialTheme.shapes.medium
-                ) {
-                    Text("Lancer le scan")
-                }
-            } else {
-                Button(
-                    onClick = onStopScanClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    ),
-                    shape = MaterialTheme.shapes.medium
-                ) {
-                    Text("Arrêter le scan")
-                }
+            item {
+                Icon(
+                    imageVector = Icons.Filled.Bluetooth,
+                    contentDescription = "Icône Bluetooth",
+                    modifier = Modifier.size(72.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
-                CircularProgressIndicator()
+
+                Text(
+                    text = "Recherche de périphériques BLE",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                if (!isScanning) {
+                    Button(
+                        onClick = onScanClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = MaterialTheme.shapes.medium
+                    ) {
+                        Text("Lancer le scan")
+                    }
+                } else {
+                    Button(
+                        onClick = onStopScanClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        ),
+                        shape = MaterialTheme.shapes.medium
+                    ) {
+                        Text("Arrêter le scan")
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    CircularProgressIndicator()
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                if (devices.isEmpty()) {
+                    Text(
+                        text = "Aucun appareil détecté pour le moment.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                } else {
+                    Text(
+                        text = "Appareils détectés :",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            devicesList(devices, context)
+            items(devices.size) { index ->
+                DeviceButton(devices[index], context)
+            }
         }
     }
 }
