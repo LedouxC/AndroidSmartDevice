@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">AndroidSmartDevice</string>
+    <string name="app_icon">App icon</string>
+    <string name="android_smart_device">Android Smart Device</string>
+    <string name="this_app_scans_nearby_bluetooth_low_energy_ble_devices">This app scans nearby Bluetooth Low Energy (BLE) devices.</string>
+    <string name="start_scanning_ble_devices">Start Scanning BLE Devices</string>
+    <string name="title_activity_scan_activity.kt">ScanActivity.kt</string>
+    <string name="title_activity_scan">ScanActivity</string>
+</resources>
