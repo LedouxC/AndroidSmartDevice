@@ -153,7 +153,6 @@ fun ScanScreen(
         Spacer(modifier = Modifier.height(16.dp))
         if (isScanning) CircularProgressIndicator()
 
-        val context = LocalContext.current
         devices.forEach { device ->
             Button(
                 onClick = { onDeviceClick(device) },
@@ -161,17 +160,7 @@ fun ScanScreen(
                     .fillMaxWidth()
                     .padding(top = 8.dp)
             ) {
-                val deviceName = if (ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.BLUETOOTH_CONNECT
-                    ) == PackageManager.PERMISSION_GRANTED
-                ) {
-                    device.name ?: "Inconnu"
-                } else {
-                    "Nom non disponible"
-                }
-
-                Text(text = "Nom : $deviceName")
+                Text(text = "Nom : ${device.name}")
             }
         }
     }

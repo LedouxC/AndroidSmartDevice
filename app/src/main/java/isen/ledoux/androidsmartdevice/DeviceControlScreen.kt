@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.bluetooth.*
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -21,7 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.util.*
+import androidx.core.content.ContextCompat
 
 @SuppressLint("MissingPermission")
 @Composable
@@ -35,18 +34,6 @@ fun DeviceControlScreen(
     var ledStates by remember { mutableStateOf(listOf(false, false, false)) }
     var clickCount3 by remember { mutableStateOf(0) }
 
-    /**
-     * Active les notifications en écrivant dans le descripteur CCCD
-     */
-    fun enableNotification(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
-        gatt.setCharacteristicNotification(characteristic, true)
-        val descriptor = characteristic.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"))
-        descriptor?.let {
-            it.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-            gatt.writeDescriptor(it)
-        }
-    }
-
     LaunchedEffect(Unit) {
         bluetoothGatt = device.connectGatt(context, false, object : BluetoothGattCallback() {
             override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
@@ -57,20 +44,15 @@ fun DeviceControlScreen(
 
             override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
                 isConnected = true
-
-                // Active les notifications sur le bouton 3
                 val charButton3 = gatt.services.getOrNull(3)?.characteristics?.getOrNull(0)
-                charButton3?.let {
-                    enableNotification(gatt, it)
-                }
+                charButton3?.let { gatt.setCharacteristicNotification(it, true) }
             }
 
             override fun onCharacteristicChanged(
                 gatt: BluetoothGatt,
                 characteristic: BluetoothGattCharacteristic
             ) {
-                val targetChar = gatt.services.getOrNull(3)?.characteristics?.getOrNull(0)
-                if (characteristic.uuid == targetChar?.uuid) {
+                if (characteristic == gatt.services.getOrNull(3)?.characteristics?.getOrNull(0)) {
                     clickCount3++
                 }
             }
@@ -94,7 +76,6 @@ fun DeviceControlScreen(
         val characteristic = service?.characteristics?.getOrNull(0)
         characteristic?.value = byteArrayOf(valueToWrite.toByte())
         bluetoothGatt?.writeCharacteristic(characteristic)
-
         ledStates = ledStates.toMutableList().also { it[index] = !ledOn }
     }
 
@@ -127,11 +108,7 @@ fun DeviceControlScreen(
                 CircularProgressIndicator()
                 Text("Connexion BLE en cours...", modifier = Modifier.padding(top = 8.dp))
             } else {
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "Logo",
-                    modifier = Modifier.size(120.dp)
-                )
+                Image(painter = painterResource(id = R.drawable.logo), contentDescription = "Logo", modifier = Modifier.size(120.dp))
                 Text("Connecté à ${device.address}", fontSize = 14.sp)
 
                 Spacer(modifier = Modifier.height(24.dp))
