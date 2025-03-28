@@ -175,34 +175,57 @@ fun DeviceDetailsScreen(
     onDisconnectClick: () -> Unit,
     isConnected: Boolean
 ) {
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+    var notificationsEnabled by remember { mutableStateOf(true) }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 24.dp, vertical = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
         ) {
-            Text(text = "Détails de l'appareil", style = MaterialTheme.typography.headlineMedium)
+            Text(
+                text = "Device Info",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "Nom de l'appareil : $deviceName",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Nom de l'appareil : $deviceName", style = MaterialTheme.typography.bodyLarge)
 
             Button(
                 onClick = {
-                    if (isConnected) {
-                        onDisconnectClick()
-                    } else {
-                        onConnectClick()
-                    }
+                    if (isConnected) onDisconnectClick() else onConnectClick()
                 },
                 modifier = Modifier
-                    .padding(vertical = 8.dp)
                     .fillMaxWidth()
+                    .height(50.dp),
+                shape = MaterialTheme.shapes.medium
             ) {
-                Text(text = if (isConnected) "Se déconnecter" else "Se connecter à l'appareil")
+                Text(text = if (isConnected) "Se déconnecter" else "Se connecter")
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Contrôle des LEDs",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             LedButton(ledId = 1, isOn = led1State, onLedToggle = onLedToggle)
             LedButton(ledId = 2, isOn = led2State, onLedToggle = onLedToggle)
@@ -210,22 +233,54 @@ fun DeviceDetailsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text(text = "Bouton Principal : $button1Count clics")
-            Text(text = "Troisième Bouton : $button3Count clics")
+            Text(
+                text = "Compteurs de clics",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Bouton Principal : $button1Count clics",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "Troisième Bouton : $button3Count clics",
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Notifications :",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Switch(
+                    checked = notificationsEnabled,
+                    onCheckedChange = { notificationsEnabled = it }
+                )
+            }
         }
     }
 }
+
 
 @Composable
 fun LedButton(ledId: Int, isOn: Boolean, onLedToggle: (Int) -> Unit) {
     Button(
         onClick = { onLedToggle(ledId) },
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isOn) Color.Green else Color.Red
+            containerColor = if (isOn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
         ),
         modifier = Modifier
-            .padding(8.dp)
             .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        shape = MaterialTheme.shapes.medium
     ) {
         Text(text = "LED $ledId - ${if (isOn) "ON" else "OFF"}")
     }
