@@ -40,28 +40,24 @@ class ScanActivity : ComponentActivity() {
     private var isBluetoothEnabled by mutableStateOf(false)
     private var isScanning by mutableStateOf(false)
 
-    // Liste des appareils BLE détectés
     private val devices = mutableStateListOf<BluetoothDevice>()
 
-    // Gestion des permissions
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             if (permissions[Manifest.permission.BLUETOOTH_SCAN] == true &&
                 permissions[Manifest.permission.BLUETOOTH_CONNECT] == true &&
                 permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true) {
-                startScan()  // Démarrer le scan si toutes les permissions sont accordées
+                startScan()
             } else {
                 Toast.makeText(this, "Permissions nécessaires non accordées", Toast.LENGTH_SHORT).show()
             }
         }
 
-    // Callback pour gérer les résultats du scan BLE
     private val scanCallback = object : ScanCallback() {
         @SuppressLint("MissingPermission")
         override fun onScanResult(callbackType: Int, result: ScanResult?) {
             super.onScanResult(callbackType, result)
             result?.device?.let { device ->
-                // Ajouter l'appareil à la liste uniquement s'il n'est pas déjà présent et qu'il a un nom
                 addDeviceIfNotExist(devices, device)
             }
         }
@@ -86,7 +82,6 @@ class ScanActivity : ComponentActivity() {
             }
         }
 
-        // Initialiser Bluetooth
         bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothAdapter = bluetoothManager.adapter
         checkBluetoothState()
@@ -107,7 +102,6 @@ class ScanActivity : ComponentActivity() {
         val permissionsToRequest = mutableListOf<String>()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // Android 12+ (API 31+) → Besoin de BLUETOOTH_SCAN, BLUETOOTH_CONNECT et ACCESS_FINE_LOCATION
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -120,22 +114,18 @@ class ScanActivity : ComponentActivity() {
                 )
             }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Android 10+ (API 29+) → Besoin de BLUETOOTH_SCAN et ACCESS_FINE_LOCATION
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
             }
         } else {
-            // Android < 10 → Seulement ACCESS_FINE_LOCATION requis
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
             }
         }
 
         if (permissionsToRequest.isEmpty()) {
-            // Toutes les permissions sont déjà accordées → Démarrer directement le scan
             startScan()
         } else {
-            // Demander les permissions puis relancer le scan une fois accordées
             requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
         }
     }
@@ -155,7 +145,6 @@ class ScanActivity : ComponentActivity() {
         }
 
         if (bluetoothAdapter.isEnabled) {
-            // Stop any scan en cours pour éviter les conflits (évite l'erreur code 2)
             bluetoothAdapter.bluetoothLeScanner.stopScan(scanCallback)
 
             isScanning = true
@@ -175,7 +164,6 @@ class ScanActivity : ComponentActivity() {
         Toast.makeText(this, "Scan arrêté.", Toast.LENGTH_SHORT).show()
     }
 
-    // Fonction pour ajouter un appareil à la liste si l'appareil n'existe pas déjà
     private fun addDeviceIfNotExist(devices: MutableList<BluetoothDevice>, device: BluetoothDevice) {
         if (!devices.any { it.address == device.address } && !device.name.isNullOrEmpty()) {
             devices.add(device)
@@ -312,7 +300,7 @@ fun DeviceButton(device: BluetoothDevice, context: Context) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.logo), // ou une icône BLE stylisée si tu veux
+                painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Appareil BLE",
                 modifier = Modifier.size(36.dp),
                 tint = MaterialTheme.colorScheme.primary

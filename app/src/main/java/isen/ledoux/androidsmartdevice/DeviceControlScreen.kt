@@ -28,13 +28,11 @@ class DeviceDetailsActivity : ComponentActivity() {
         setContent {
             val context = LocalContext.current
 
-            // États pour les LEDs et la connexion
             var led1State by remember { mutableStateOf(false) }
             var led2State by remember { mutableStateOf(false) }
             var led3State by remember { mutableStateOf(false) }
             var isConnected by remember { mutableStateOf(false) }
 
-            // États pour les compteurs des boutons physiques
             var button1Count by remember { mutableStateOf("") }
             var button3Count by remember { mutableStateOf("") }
 
@@ -105,7 +103,6 @@ class DeviceDetailsActivity : ComponentActivity() {
 
             override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
-                    // Service 3, Caractéristique 2 (Bouton principal)
                     val service3 = gatt?.services?.getOrNull(2)
                     service3?.characteristics?.getOrNull(1)?.let { characteristic ->
                         gatt.setCharacteristicNotification(characteristic, true)
@@ -115,7 +112,6 @@ class DeviceDetailsActivity : ComponentActivity() {
                         }
                     }
 
-                    // Service 2, Caractéristique 1 (Troisième bouton)
                     val service2 = gatt?.services?.getOrNull(1)
                     service2?.characteristics?.getOrNull(0)?.let { characteristic ->
                         gatt.setCharacteristicNotification(characteristic, true)
@@ -130,12 +126,11 @@ class DeviceDetailsActivity : ComponentActivity() {
             override fun onCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?) {
                 characteristic?.let {
                     if (it.value != null && it.value.size >= 2) {
-                        // Lier les états des boutons (inverser les indices si nécessaire)
                         val btn1State = it.value[1].toInt() // Bouton principal
                         val btn3State = it.value[0].toInt() // Troisième bouton
 
                         runOnUiThread {
-                            updateCounts(btn1State, btn3State) // Mettre à jour les compteurs avec les états des boutons
+                            updateCounts(btn1State, btn3State)
                         }
                     }
                 }
